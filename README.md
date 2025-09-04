@@ -30,24 +30,33 @@ to a linked list of block headers to access the block data.
 
 ### rda header 2.0
 
-| Offset | Size | Field         |
-| ------ | ---- | ------------- |
-| 0      | 36   | magic         |
-| 36     | 1008 | reserved      |
-| 1008   | 4    | block pointer |
+| Field         | Version | Offset | Size |
+| ------------- | ------- | ------ | ---- |
+| magic         | 2.0     | 0      | 36   |
+|               | 2.2     | 0      | 18   |
+| reserved      | 2.0     | 36     | 1008 |
+|               | 2.2     | 18     | 766  |
+| block pointer | 2.0     | 1008   | 4    |
+|               | 2.2     | 784    | 8    |
 
 #### magic
 
-UTF-16 representation of the string `Resource File V2.0`
+* UTF-16 representation of the string `Resource File V2.0`
+* UTF-8 representation of the string `Resource File V2.2`
 
-### rda header 2.2
+### block header
 
-| Offset | Size | Field         |
-| ------ | ---- | ------------- |
-| 0      | 18   | magic         |
-| 18     | 766  | reserved      |
-| 784    | 8    | block pointer |
+| Field             | Version | Offset | Size |
+| ----------------- | ------- | ------ | ---- |
+| flags             |         | 0      | 4    |
+| files             |         | 4      | 4    |
+| size compressed   | 2.0     | 8      | 4    |
+|                   | 2.2     | 8      | 8    |
+| size uncompressed | 2.0     | 12     | 4    |
+|                   | 2.2     | 16     | 8    |
+| block pointer     | 2.0     | 16     | 4    |
+|                   | 2.2     | 24     | 8    |
 
-#### magic
+#### block pointer
 
-UTF-8 representation of the string `Resource File V2.2`
+the last block points to itself.

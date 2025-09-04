@@ -15,9 +15,17 @@ struct options {
 
 typedef struct {
   uint8_t version;
-  uint32_t ptr;
+  uint64_t ptr;
   FILE *fd;
 } rda_t;
+
+typedef struct {
+  uint32_t flags;
+  uint32_t files;
+  uint64_t csize;
+  uint64_t usize;
+  uint64_t nxt;
+} rda_block_t;
 
 void rda_close(rda_t *rda) {
   fclose(rda->fd);
@@ -49,7 +57,7 @@ int rda_open(rda_t *rda, char *archive) {
   }
 
   rda->version = RDA_VERSION_2_2;
-  uint32_t ptr = 0;
+  uint64_t ptr = 0;
   switch (rda->version) {
     case RDA_VERSION_2_0:
       fseek(rda->fd, sizeof(char) * RDA_HEADER_2_0_PTR, SEEK_SET);
@@ -72,15 +80,49 @@ int rda_open(rda_t *rda, char *archive) {
   return 0;
 }
 
+rda_block_t *rda_parse_block(rda_t *rda, uint64_t ptr) {
+  rda_block_t *blk = malloc(sizeof(rda_block_t));
+  fseek(rda->fd, sizeof(char) * ptr, SEEK_SET);
+  fread(&blk->flags, sizeof(char), RDA_BLOCK_HEADER_FLAGS_LEN, rda->fd);
+  fseek(rda->fd, sizeof(char) * RDA_BLOCK_HEADER_FLAGS_LEN, SEEK_CUR);
+  fread(&blk->files, sizeof(char), RDA_BLOCK_HEADER_FILES_LEN, rda->fd);
+
+  uint32_t csize = 0, usize = 0, osize = 0;
+  switch (rda->version) {
+    case RDA_VERSION_2_0:
+      csize = RDA_BLOCK_HEADER_2_0_CSIZE;
+      usize = RDA_BLOCK_HEADER_2_0_USIZE;
+      osize = RDA_BLOCK_HEADER_2_0_OSIZE;
+      break;
+    case RDA_VERSION_2_2:
+      csize = RDA_BLOCK_HEADER_2_2_CSIZE;
+      usize = RDA_BLOCK_HEADER_2_2_USIZE;
+      osize = RDA_BLOCK_HEADER_2_2_OSIZE;
+      break;
+  }
+
+  fseek(rda->fd, sizeof(char) * csize, SEEK_CUR);
+  fread(&blk->csize, sizeof(char), csize, rda->fd);
+  fseek(rda->fd, sizeof(char) * usize, SEEK_CUR);
+  fread(&blk->usize, sizeof(char), usize, rda->fd);
+  fseek(rda->fd, sizeof(char) * osize, SEEK_CUR);
+  fread(&blk->nxt, sizeof(char), osize, rda->fd);
+
+  return blk;
+}
+
 int main(int argc, char *argv[]) {
   int opt;
   options_t o;
 
   memset(&o, 0, sizeof(options_t));
-  while (opt = (getopt(argc, argv, "+x") != -1)) {
+  while ((opt = getopt(argc, argv, "xf:")) != -1) {
     switch (opt) {
       case 'x':
         o.extract = 1;
+        break;
+      case 'f':
+        o.archive = optarg;
         break;
       default:
         fprintf(stderr, "Usage: %s [-x] file\n", argv[0]);
@@ -88,16 +130,19 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (optind >= argc) {
-    fprintf(stderr, "Usage: %s [-x] file\n", argv[0]);
-    return EXIT_FAILURE;
-  }
-
-  o.archive = argv[optind];
-
   rda_t rda;
   if (rda_open(&rda, o.archive) == -1)
     return EXIT_FAILURE;
+
+  if (o.extract) {
+    uint64_t ptr = rda.ptr;
+
+    do {
+      rda_block_t *blk = rda_parse_block(&rda, ptr);
+      ptr = (ptr != blk->nxt) ? blk->nxt : -1;
+      free(blk);
+    } while (ptr != -1);
+  }
 
   rda_close(&rda);
   return EXIT_SUCCESS;

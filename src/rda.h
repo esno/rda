@@ -1,6 +1,8 @@
 #ifndef rda_h
 #define rda_h 1
 
+//
+// RDA header
 #define RDA_HEADER_2_0_MAGIC_LEN 36
 #define RDA_HEADER_2_2_MAGIC_LEN 18
 #define RDA_HEADER_MAGIC_LEN RDA_HEADER_2_0_MAGIC_LEN
@@ -17,5 +19,18 @@
 
 #define RDA_VERSION_2_0 0x00
 #define RDA_VERSION_2_2 0x01
+
+//
+// rda block header
+#define RDA_BLOCK_HEADER_FLAGS_LEN 4
+#define RDA_BLOCK_HEADER_FILES_LEN 4
+
+#define RDA_BLOCK_HEADER_2_0_CSIZE 4
+#define RDA_BLOCK_HEADER_2_0_OSIZE 4
+#define RDA_BLOCK_HEADER_2_0_USIZE 4
+
+#define RDA_BLOCK_HEADER_2_2_CSIZE 8
+#define RDA_BLOCK_HEADER_2_2_OSIZE 8
+#define RDA_BLOCK_HEADER_2_2_USIZE 8
 
 #endif
