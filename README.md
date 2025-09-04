@@ -11,6 +11,8 @@ two currently known versions
 
 the file structure is as follow
 
+| Section    | Fields        |
+| ---------- | ------------- |
 | rda header | magic         |
 |            | reserved      |
 |            | block pointer |
