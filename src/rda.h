@@ -38,4 +38,6 @@
 #define RDA_BLOCK_FLAGS_RESIDENT 0x01 << 2
 #define RDA_BLOCK_FLAGS_DELETED 0x01 << 3
 
+#define RDA_FILE_PATH_LEN 520
+
 #endif
