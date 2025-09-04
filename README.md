@@ -70,4 +70,4 @@ to a linked list of block headers to access the block data.
 
 #### block pointer
 
-the end of the linked list is indicated by a value of `0`.
+the end of the linked list is indicated by an empty block with pointer value of `0`.

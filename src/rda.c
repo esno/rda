@@ -96,10 +96,9 @@ int rda_open(rda_t *rda, char *archive) {
 rda_block_t *rda_parse_block(rda_t *rda, uint64_t ptr) {
   rda_block_t *blk = malloc(sizeof(rda_block_t));
   memset(blk, 0, sizeof(rda_block_t));
+
   fseek(rda->fd, sizeof(char) * ptr, SEEK_SET);
   fread(&blk->flags, sizeof(char), RDA_BLOCK_HEADER_FLAGS_LEN, rda->fd);
-
-  fseek(rda->fd, sizeof(char) * RDA_BLOCK_HEADER_FLAGS_LEN, SEEK_CUR);
   fread(&blk->files, sizeof(char), RDA_BLOCK_HEADER_FILES_LEN, rda->fd);
 
   uint32_t csize = 0, usize = 0, osize = 0;
@@ -116,13 +115,8 @@ rda_block_t *rda_parse_block(rda_t *rda, uint64_t ptr) {
       break;
   }
 
-  fseek(rda->fd, sizeof(char) * RDA_BLOCK_HEADER_FILES_LEN, SEEK_CUR);
   fread(&blk->csize, sizeof(char), csize, rda->fd);
-
-  fseek(rda->fd, sizeof(char) * csize, SEEK_CUR);
   fread(&blk->usize, sizeof(char), usize, rda->fd);
-
-  fseek(rda->fd, sizeof(char) * usize, SEEK_CUR);
   fread(&blk->nxt, sizeof(char), osize, rda->fd);
 
   blk->self = ptr;
@@ -137,8 +131,6 @@ rda_file_t *rda_parse_file(rda_t *rda, rda_block_t *blk) {
   if (r == 1) {
     fseek(rda->fd, sizeof(char) * blk->self - 16, SEEK_SET);
     fread(&f->resident.csize, sizeof(char), 8, rda->fd);
-
-    fseek(rda->fd, sizeof(char) * 8, SEEK_CUR);
     fread(&f->resident.usize, sizeof(char), 8, rda->fd);
     return NULL;
   }
