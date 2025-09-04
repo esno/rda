@@ -25,6 +25,7 @@ typedef struct {
   uint64_t csize;
   uint64_t usize;
   uint64_t nxt;
+  uint64_t self;
 } rda_block_t;
 
 void rda_close(rda_t *rda) {
@@ -107,8 +108,20 @@ rda_block_t *rda_parse_block(rda_t *rda, uint64_t ptr) {
   fread(&blk->usize, sizeof(char), usize, rda->fd);
   fseek(rda->fd, sizeof(char) * osize, SEEK_CUR);
   fread(&blk->nxt, sizeof(char), osize, rda->fd);
+  blk->nxt = (blk->nxt == ptr) ? -1 : blk->nxt;
+  blk->self = ptr;
 
   return blk;
+}
+
+void rda_print_block(rda_block_t *blk) {
+  int c = blk->flags & RDA_BLOCK_FLAGS_COMPRESSED;
+  int e = (blk->flags & RDA_BLOCK_FLAGS_ENCRYPTED) >> 1;
+  int r = (blk->flags & RDA_BLOCK_FLAGS_RESIDENT) >> 2;
+  int d = (blk->flags & RDA_BLOCK_FLAGS_DELETED) >> 3;
+
+  fprintf(stdout, "[**] block 0x%08x (c=%d;e=%d;r=%d;d=%d %u/%u)\n",
+    blk->self, c, e, r, d, blk->csize, blk->usize);
 }
 
 int main(int argc, char *argv[]) {
@@ -139,7 +152,8 @@ int main(int argc, char *argv[]) {
 
     do {
       rda_block_t *blk = rda_parse_block(&rda, ptr);
-      ptr = (ptr != blk->nxt) ? blk->nxt : -1;
+      rda_print_block(blk);
+      ptr = blk->nxt;
       free(blk);
     } while (ptr != -1);
   }

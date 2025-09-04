@@ -59,6 +59,15 @@ to a linked list of block headers to access the block data.
 | block pointer     | 2.0     | 16     | 4    |
 |                   | 2.2     | 24     | 8    |
 
+#### flags
+
+| Flag     | Description     |
+| -------- | --------------- |
+| `0x0001` | compressed      |
+| `0x0010` | encrypted       |
+| `0x0100` | memory-resident |
+| `0x1000` | deleted         |
+
 #### block pointer
 
 the last block points to itself.
