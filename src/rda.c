@@ -85,6 +85,7 @@ rda_block_t *rda_parse_block(rda_t *rda, uint64_t ptr) {
   rda_block_t *blk = malloc(sizeof(rda_block_t));
   fseek(rda->fd, sizeof(char) * ptr, SEEK_SET);
   fread(&blk->flags, sizeof(char), RDA_BLOCK_HEADER_FLAGS_LEN, rda->fd);
+
   fseek(rda->fd, sizeof(char) * RDA_BLOCK_HEADER_FLAGS_LEN, SEEK_CUR);
   fread(&blk->files, sizeof(char), RDA_BLOCK_HEADER_FILES_LEN, rda->fd);
 
@@ -102,12 +103,15 @@ rda_block_t *rda_parse_block(rda_t *rda, uint64_t ptr) {
       break;
   }
 
-  fseek(rda->fd, sizeof(char) * csize, SEEK_CUR);
+  fseek(rda->fd, sizeof(char) * RDA_BLOCK_HEADER_FILES_LEN, SEEK_CUR);
   fread(&blk->csize, sizeof(char), csize, rda->fd);
-  fseek(rda->fd, sizeof(char) * usize, SEEK_CUR);
+
+  fseek(rda->fd, sizeof(char) * csize, SEEK_CUR);
   fread(&blk->usize, sizeof(char), usize, rda->fd);
-  fseek(rda->fd, sizeof(char) * osize, SEEK_CUR);
+
+  fseek(rda->fd, sizeof(char) * usize, SEEK_CUR);
   fread(&blk->nxt, sizeof(char), osize, rda->fd);
+
   blk->nxt = (blk->nxt == ptr) ? -1 : blk->nxt;
   blk->self = ptr;
 
