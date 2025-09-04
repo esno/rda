@@ -9,7 +9,26 @@ two currently known versions
 | 2.0     | 1404, 2070      |
 | 2.2     | 117, 1800, 2205 |
 
-### header 2.0
+the file structure is as follow
+
+| rda header | magic         |
+|            | reserved      |
+|            | block pointer |
+| rda data   | block data    |
+|            | block data    |
+|            | block data    |
+|            | ...           |
+|            | block header  |
+|            | block header  |
+|            | block header  |
+|            | ...           |
+
+the `magic` field describes the archive version.
+
+the `block pointer` locates the first block header and works as entrypoint
+to a linked list of block headers to access the block data.
+
+### rda header 2.0
 
 | Offset | Size | Field         |
 | ------ | ---- | ------------- |
@@ -21,7 +40,7 @@ two currently known versions
 
 UTF-16 representation of the string `Resource File V2.0`
 
-### header 2.2
+### rda header 2.2
 
 | Offset | Size | Field         |
 | ------ | ---- | ------------- |
