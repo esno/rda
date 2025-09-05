@@ -63,7 +63,7 @@ int rda_extract_file(rda_t *rda, rda_file_t *f, char *workdir) {
     struct stat sb;
     if (stat(dest, &sb) == -1) {
       if (mkdir(dest, 0755) == -1) {
-        fprintf(stderr, "[!!] %s: mkdir(%s)\n", strerror(errno), dest);
+        fprintf(stderr, "[\e[0;31m!\e[0m] %s: mkdir(\e[0;34m%s\e[0m)\n", strerror(errno), dest);
         return -1;
       }
     }
@@ -78,7 +78,7 @@ int rda_extract_file(rda_t *rda, rda_file_t *f, char *workdir) {
   memset(buffer, 0, sizeof(char) * RDA_BUFFER_SIZE);
   FILE *fd = fopen(dest, "w");
   if (fd == NULL) {
-    fprintf(stderr, "[!!] %s: fopen(%s)\n", strerror(errno), dest);
+    fprintf(stderr, "[\e[0;31m!\e[0m] %s: fopen(\e[0;34m%s\e[0m)\n", strerror(errno), dest);
     return -1;
   }
 
@@ -93,7 +93,7 @@ int rda_extract_file(rda_t *rda, rda_file_t *f, char *workdir) {
     rcount = fread(buffer, sizeof(char), bsize, rda->fd);
     wcount = fwrite(buffer, sizeof(char), rcount, fd);
     if (wcount != rcount) {
-      fprintf(stderr, "[!!] %s: fwrite(%s)\n", strerror(errno), dest);
+      fprintf(stderr, "[\e[0;31m!\e[0m] %s: fwrite(\e[0;34m%s\e[0m)\n", strerror(errno), dest);
       fclose(fd);
       return -1;
     }
@@ -206,9 +206,6 @@ rda_file_t *rda_parse_file(rda_t *rda, rda_block_t *blk, uint64_t ptr) {
     }
   }
 
-  if (path[0] != 'd')
-    printf("shit %s\n", path[0]);
-
   uint32_t osize = 0, csize = 0, usize = 0, hsize = 0, mtime = 0;
   switch (rda->version) {
     case RDA_VERSION_2_0:
@@ -242,12 +239,12 @@ void rda_print_block(rda_block_t *blk) {
   int r = (blk->flags & RDA_BLOCK_FLAGS_RESIDENT) >> 2;
   int d = (blk->flags & RDA_BLOCK_FLAGS_DELETED) >> 3;
 
-  fprintf(stdout, "[**] block 0x%08x (c=%d;e=%d;r=%d;d=%d [n=%d] %u/%u) => 0x%08x\n",
+  fprintf(stdout, "[\e[0;32m#\e[0m] block@\e[0;36m0x%08x\e[0m (c=%d;e=%d;r=%d;d=%d [n=%d] %u/%u) => \e[0;36m0x%08x\e[0m\n",
     blk->self, c, e, r, d, blk->files, blk->csize, blk->usize, blk->nxt);
 }
 
 void rda_print_file(rda_file_t *f) {
-  fprintf(stdout, "[--] > %s@0x%08x (m=%d %u/%u) => 0x%08x\n",
+  fprintf(stdout, "[\e[0;32m+\e[0m] > \e[0;34m%s\e[0m@\e[0;36m0x%08x\e[0m (m=%d %u/%u) => \e[0;36m0x%08x\e[0m\n",
     f->path, f->ptr, f->mtime, f->csize, f->usize, f->nxt);
 }
 

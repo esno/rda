@@ -1,7 +1,7 @@
 # Anno Resource Files (.rda)
 
 Anno is one of the greatest city builder and economy simulators out there.
-this tool shall extract it's game data to allow game modifications
+this tool shall extract its game data to allow game modifications
 on linux-based systems.
 
 > be aware that it is in a very early stage
@@ -12,25 +12,7 @@ on linux-based systems.
 
 ## usage
 
-    $ ./rda -xf ui.rda
-    [**] block 0x05545c1a (c=0;e=0;r=0;d=0 [n=34] 19040/19040) => 0x8ab1693a
-    [--] > data/fonts/31df-udmarugothic-w4.ttc@0x00000318 (m=1692287079 4090762/4090762) => 0x055413ea
-    [--] > data/fonts/32df-udmarugothic-w6.ttc@0x003e6ea2 (m=1692287079 4072378/4072378) => 0x0554161a
-    [--] > data/fonts/adonis-regular.otf@0x007c925c (m=1718268012 109076/109076) => 0x0554184a
-    [--] > data/fonts/albertusnova-regular.otf@0x007e3c70 (m=1724265053 197464/197464) => 0x05541a7a
-    [--] > data/fonts/albertusnova_eval250512-regular.otf@0x00813fc8 (m=1747138539 174520/174520) => 0x05541caa
-    [--] > data/fonts/albertusnovaforanno117tab.otf@0x0083e980 (m=1747829164 178532/178532) => 0x05541eda
-
-    [...]
-
-    [--] > data/fonts/pelago-regular.otf@0x054b6266 (m=1718268012 283548/283548) => 0x055457ba
-    [--] > data/fonts/roboto-light.ttf@0x054fb602 (m=1692287080 140276/140276) => 0x055459ea
-    [--] > data/fonts/roboto-regular.ttf@0x0551d9f6 (m=1692287080 145348/145348) => 0x05545c1a
-    [**] block 0x8ab1693a (c=0;e=0;r=0;d=0 [n=10247] 5738320/5738320) => 0xb6045b12
-    [--] > data/ui/2kimages/4k/base/design_system/backgrounds/bg_badge_squarebase_20x8_0.dds@0x05545c3a (m=1738611313 3620/3620) => 0x8a59dc1a
-    [--] > data/ui/2kimages/4k/base/design_system/strokes/stroke4_btn_selected_12_0.dds@0x05546a5e (m=1745582519 3268/3268) => 0x8a59de4a
-
-    [...]
+![console](./assets/console.png "console")
 
 ## format
 
