@@ -29,15 +29,11 @@ typedef struct {
 } rda_block_t;
 
 typedef struct {
-  char path[RDA_FILE_PATH_LEN];
+  char path[RDA_FILE_HEADER_PATH_LEN];
   uint64_t *ptr;
   uint64_t csize;
   uint64_t usize;
-  uint64_t timestamp;
-  struct {
-    uint64_t csize;
-    uint64_t usize;
-  } resident;
+  uint64_t mtime;
 } rda_file_t;
 
 void rda_close(rda_t *rda) {
@@ -133,25 +129,39 @@ rda_file_t *rda_parse_file(rda_t *rda, rda_block_t *blk) {
   rda_file_t *f = malloc(sizeof(rda_file_t));
   memset(f, 0, sizeof(rda_file_t));
 
-  int r = (blk->flags & RDA_BLOCK_FLAGS_RESIDENT) >> 2;
-  if (r == 1) {
-    fseek(rda->fd, sizeof(char) * blk->self - 16, SEEK_SET);
-    fread(&f->resident.csize, sizeof(char), 8, rda->fd);
-    fread(&f->resident.usize, sizeof(char), 8, rda->fd);
-    return NULL;
-  }
+  char path[RDA_FILE_HEADER_PATH_LEN];
+  memset(&path, 0, sizeof(char) * RDA_FILE_HEADER_PATH_LEN);
 
   fseek(rda->fd, sizeof(char) * blk->self - blk->csize, SEEK_SET);
-  char path[RDA_FILE_PATH_LEN];
-  memset(&path, 0, sizeof(char) * RDA_FILE_PATH_LEN);
-  memset(&f->path, 0, sizeof(char) * RDA_FILE_PATH_LEN);
-  fread(&path, sizeof(char), RDA_FILE_PATH_LEN, rda->fd);
-  for (int i = 0, j = 0; i < RDA_FILE_PATH_LEN; ++i) {
+  fread(&path, sizeof(char), RDA_FILE_HEADER_PATH_LEN, rda->fd);
+  for (int i = 0, j = 0; i < RDA_FILE_HEADER_PATH_LEN; ++i) {
     if (path[i] != '\0') {
       f->path[j] = path[i];
       ++j;
     }
   }
+
+  uint32_t osize = 0, csize = 0, usize = 0, mtime = 0;
+  switch (rda->version) {
+    case RDA_VERSION_2_0:
+      osize = RDA_FILE_HEADER_2_0_OSIZE;
+      csize = RDA_FILE_HEADER_2_0_CSIZE;
+      usize = RDA_FILE_HEADER_2_0_USIZE;
+      mtime = RDA_FILE_HEADER_2_0_MTIME;
+      break;
+    case RDA_VERSION_2_2:
+      osize = RDA_FILE_HEADER_2_2_OSIZE;
+      csize = RDA_FILE_HEADER_2_2_CSIZE;
+      usize = RDA_FILE_HEADER_2_2_USIZE;
+      mtime = RDA_FILE_HEADER_2_2_MTIME;
+      break;
+  }
+
+  fread(&f->ptr, sizeof(char), osize, rda->fd);
+  fread(&f->csize, sizeof(char), csize, rda->fd);
+  fread(&f->usize, sizeof(char), usize, rda->fd);
+  fread(&f->mtime, sizeof(char), mtime, rda->fd);
+
   return f;
 }
 
@@ -166,7 +176,8 @@ void rda_print_block(rda_block_t *blk) {
 }
 
 void rda_print_file(rda_file_t *f) {
-  fprintf(stdout, "[--] > %s\n", f->path);
+  fprintf(stdout, "[--] > %s (m=%d %u/%u)\n",
+    f->path, f->mtime, f->csize, f->usize);
 }
 
 int main(int argc, char *argv[]) {
@@ -203,7 +214,7 @@ int main(int argc, char *argv[]) {
       rda_print_block(blk);
       rda_file_t *f = rda_parse_file(&rda, blk);
       rda_print_file(f);
-      
+
       ptr = blk->nxt;
       free(blk);
     } while (ptr != 0);
