@@ -120,6 +120,12 @@ rda_block_t *rda_parse_block(rda_t *rda, uint64_t ptr) {
   fread(&blk->nxt, sizeof(char), osize, rda->fd);
 
   blk->self = ptr;
+
+  if (blk->nxt == 0 && blk->csize == 0 && blk->usize == 0) {
+    free(blk);
+    return NULL;
+  }
+
   return blk;
 }
 
@@ -191,9 +197,13 @@ int main(int argc, char *argv[]) {
 
     do {
       rda_block_t *blk = rda_parse_block(&rda, ptr);
+      if (blk == NULL)
+        break;
+
       rda_print_block(blk);
       rda_file_t *f = rda_parse_file(&rda, blk);
       rda_print_file(f);
+      
       ptr = blk->nxt;
       free(blk);
     } while (ptr != 0);

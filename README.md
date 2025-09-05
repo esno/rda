@@ -31,8 +31,6 @@ on linux-based systems.
     [--] > data/ui/studio/atlases/console_shared_asset_01_0.dds
     [**] block 0xc1bfd1d9 (c=0;e=0;r=0;d=0 1680/1680)
     [--] > data/ui/runtimepng/bgr_minimap_undiscovered.png
-    [**] block 0xc1bfd1f9 (c=0;e=0;r=0;d=0 0/0)
-    [--] >
 
 ## format
 
