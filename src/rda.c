@@ -15,6 +15,7 @@ typedef struct options options_t;
 struct options {
   uint8_t extract;
   char *archive;
+  char *workdir;
 };
 
 typedef struct {
@@ -255,25 +256,30 @@ int main(int argc, char *argv[]) {
   options_t o;
 
   memset(&o, 0, sizeof(options_t));
-  while ((opt = getopt(argc, argv, "xf:")) != -1) {
+  while ((opt = getopt(argc, argv, "xf:C:")) != -1) {
     switch (opt) {
-      case 'x':
-        o.extract = 1;
+      case 'C':
+        o.workdir = optarg;
         break;
       case 'f':
         o.archive = optarg;
         break;
+      case 'x':
+        o.extract = 1;
+        break;
       default:
-        fprintf(stderr, "Usage: %s [-x] file\n", argv[0]);
+        fprintf(stderr, "Usage: %s -xf file [-C ./workdir] \n", argv[0]);
         return EXIT_FAILURE;
     }
   }
 
-  rda_t rda;
-  if (rda_open(&rda, o.archive) == -1)
-    return EXIT_FAILURE;
+  o.workdir = (o.workdir == NULL) ? "." : o.workdir;
 
-  if (o.extract) {
+  if (o.extract && o.archive) {
+    rda_t rda;
+    if (rda_open(&rda, o.archive) == -1)
+      return EXIT_FAILURE;
+
     uint64_t ptr = rda.ptr;
 
     do {
@@ -287,9 +293,9 @@ int main(int argc, char *argv[]) {
       for (int i = 0; i < blk->files; ++i) {
         f = rda_parse_file(&rda, blk, fptr);
         rda_print_file(f);
-        if (rda_extract_file(&rda, f, ".") == -1)
+        if (rda_extract_file(&rda, f, o.workdir) == -1)
           break;
-        
+
         fptr = f->nxt;
         free(f);
       }
@@ -297,8 +303,12 @@ int main(int argc, char *argv[]) {
       ptr = blk->nxt;
       free(blk);
     } while (ptr != 0);
+
+    rda_close(&rda);
+  } else  {
+    fprintf(stderr, "Usage: %s -xf file [-C ./workdir] \n", argv[0]);
+    return EXIT_FAILURE;
   }
 
-  rda_close(&rda);
   return EXIT_SUCCESS;
 }
