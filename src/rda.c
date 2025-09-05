@@ -63,7 +63,7 @@ int rda_extract_file(rda_t *rda, rda_file_t *f, char *workdir) {
     struct stat sb;
     if (stat(dest, &sb) == -1) {
       if (mkdir(dest, 0755) == -1) {
-        fprintf(stderr, "[!!] %s (%s)\n", strerror(errno), dest);
+        fprintf(stderr, "[!!] %s: mkdir(%s)\n", strerror(errno), dest);
         return -1;
       }
     }
@@ -72,13 +72,13 @@ int rda_extract_file(rda_t *rda, rda_file_t *f, char *workdir) {
     strcpy(&dest[t], "/");
     strcpy(&dest[t + 1], token);
     t = t + strlen(token) + 1;
-  } while (t < p);
+  } while (t - w < p);
 
   unsigned char *buffer[RDA_BUFFER_SIZE];
   memset(buffer, 0, sizeof(char) * RDA_BUFFER_SIZE);
   FILE *fd = fopen(dest, "w");
   if (fd == NULL) {
-    fprintf(stderr, "[!!] %s (%s)\n", strerror(errno), dest);
+    fprintf(stderr, "[!!] %s: fopen(%s)\n", strerror(errno), dest);
     return -1;
   }
 
@@ -93,7 +93,7 @@ int rda_extract_file(rda_t *rda, rda_file_t *f, char *workdir) {
     rcount = fread(buffer, sizeof(char), bsize, rda->fd);
     wcount = fwrite(buffer, sizeof(char), rcount, fd);
     if (wcount != rcount) {
-      fprintf(stderr, "[!!] %s (%s)\n", strerror(errno), dest);
+      fprintf(stderr, "[!!] %s: fwrite(%s)\n", strerror(errno), dest);
       fclose(fd);
       return -1;
     }
