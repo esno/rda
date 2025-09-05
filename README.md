@@ -1,6 +1,6 @@
 # Anno Resource Files (.rda)
 
-Anno is one of the city builder and economy simulator.
+Anno is one of the greatest city builder and economy simulators out there.
 this tool shall extract it's game data to allow game modifications
 on linux-based systems.
 
@@ -34,7 +34,7 @@ on linux-based systems.
 
 ## format
 
-two currently known versions
+there are two known versions out there
 
 | Version | Used in         |
 | ------- | --------------- |
@@ -48,12 +48,12 @@ the file structure is as follow
 | rda header | magic         |
 |            | reserved      |
 |            | block pointer |
-| rda data   | block data    |
-|            | block data    |
-|            | block data    |
+| rda data   | file data     |
+|            | file data     |
 |            | ...           |
+|            | file header   |
 |            | block header  |
-|            | block header  |
+|            | file header   |
 |            | block header  |
 |            | ...           |
 
@@ -103,3 +103,27 @@ to a linked list of block headers to access the block data.
 #### block pointer
 
 the end of the linked list is indicated by an empty block with pointer value of `0`.
+
+### file header
+
+| Field             | Version | Offset | Size |
+| ----------------- | ------- | ------ | ---- |
+| path              |         | 0      | 520  |
+| data pointer      | 2.0     | 520    | 4    |
+|                   | 2.2     | 520    | 8    |
+| size compressed   | 2.0     | 524    | 4    |
+|                   | 2.2     | 528    | 8    |
+| size uncompressed | 2.0     | 528    | 4    |
+|                   | 2.2     | 536    | 8    |
+| mtime             | 2.0     | 532    | 4    |
+|                   | 2.2     | 544    | 8    |
+| reserved          | 2.0     | 536    | 4    |
+|                   | 2.2     | 552    | 8    |
+
+the location of the `file header` is right before the `block header`.
+> file header offset = block header offset - size compressed
+
+### path
+
+the file path and name (e.g. `data/fonts/31df-udmarugothic-w4.ttc`).
+it is an array of null-terminated characters (`d\0a\0t\0`...).
