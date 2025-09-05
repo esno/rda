@@ -24,6 +24,7 @@ typedef struct {
 } rda_t;
 
 typedef struct {
+  uint64_t ptr;
   uint32_t flags;
   uint32_t files;
   uint64_t csize;
@@ -38,6 +39,8 @@ typedef struct {
   uint64_t csize;
   uint64_t usize;
   uint64_t mtime;
+  uint64_t nxt;
+  uint64_t self;
 } rda_file_t;
 
 void rda_close(rda_t *rda) {
@@ -175,6 +178,7 @@ rda_block_t *rda_parse_block(rda_t *rda, uint64_t ptr) {
   fread(&blk->nxt, sizeof(char), osize, rda->fd);
 
   blk->self = ptr;
+  blk->ptr = blk->self - blk->csize;
 
   if (blk->nxt == 0 && blk->csize == 0 && blk->usize == 0) {
     free(blk);
@@ -184,14 +188,15 @@ rda_block_t *rda_parse_block(rda_t *rda, uint64_t ptr) {
   return blk;
 }
 
-rda_file_t *rda_parse_file(rda_t *rda, rda_block_t *blk) {
+rda_file_t *rda_parse_file(rda_t *rda, rda_block_t *blk, uint64_t ptr) {
   rda_file_t *f = malloc(sizeof(rda_file_t));
   memset(f, 0, sizeof(rda_file_t));
 
   char path[RDA_FILE_HEADER_PATH_LEN];
   memset(&path, 0, sizeof(char) * RDA_FILE_HEADER_PATH_LEN);
 
-  fseek(rda->fd, sizeof(char) * (blk->self - blk->csize), SEEK_SET);
+  f->self = ptr;
+  fseek(rda->fd, sizeof(char) * f->self, SEEK_SET);
   fread(&path, sizeof(char), RDA_FILE_HEADER_PATH_LEN, rda->fd);
   for (int i = 0, j = 0; i < RDA_FILE_HEADER_PATH_LEN; ++i) {
     if (path[i] != '\0') {
@@ -200,19 +205,24 @@ rda_file_t *rda_parse_file(rda_t *rda, rda_block_t *blk) {
     }
   }
 
-  uint32_t osize = 0, csize = 0, usize = 0, mtime = 0;
+  if (path[0] != 'd')
+    printf("shit %s\n", path[0]);
+
+  uint32_t osize = 0, csize = 0, usize = 0, hsize = 0, mtime = 0;
   switch (rda->version) {
     case RDA_VERSION_2_0:
       osize = RDA_FILE_HEADER_2_0_OSIZE;
       csize = RDA_FILE_HEADER_2_0_CSIZE;
       usize = RDA_FILE_HEADER_2_0_USIZE;
       mtime = RDA_FILE_HEADER_2_0_MTIME;
+      hsize = RDA_FILE_HEADER_2_0_SIZE;
       break;
     case RDA_VERSION_2_2:
       osize = RDA_FILE_HEADER_2_2_OSIZE;
       csize = RDA_FILE_HEADER_2_2_CSIZE;
       usize = RDA_FILE_HEADER_2_2_USIZE;
       mtime = RDA_FILE_HEADER_2_2_MTIME;
+      hsize = RDA_FILE_HEADER_2_2_SIZE;
       break;
   }
 
@@ -220,6 +230,7 @@ rda_file_t *rda_parse_file(rda_t *rda, rda_block_t *blk) {
   fread(&f->csize, sizeof(char), csize, rda->fd);
   fread(&f->usize, sizeof(char), usize, rda->fd);
   fread(&f->mtime, sizeof(char), mtime, rda->fd);
+  f->nxt = f->self + hsize;
 
   return f;
 }
@@ -230,13 +241,13 @@ void rda_print_block(rda_block_t *blk) {
   int r = (blk->flags & RDA_BLOCK_FLAGS_RESIDENT) >> 2;
   int d = (blk->flags & RDA_BLOCK_FLAGS_DELETED) >> 3;
 
-  fprintf(stdout, "[**] block 0x%08x (c=%d;e=%d;r=%d;d=%d %u/%u)\n",
-    blk->self, c, e, r, d, blk->csize, blk->usize);
+  fprintf(stdout, "[**] block 0x%08x (c=%d;e=%d;r=%d;d=%d [n=%d] %u/%u) => 0x%08x\n",
+    blk->self, c, e, r, d, blk->files, blk->csize, blk->usize, blk->nxt);
 }
 
 void rda_print_file(rda_file_t *f) {
-  fprintf(stdout, "[--] > %s (m=%d %u/%u)\n",
-    f->path, f->mtime, f->csize, f->usize);
+  fprintf(stdout, "[--] > %s@0x%08x (m=%d %u/%u) => 0x%08x\n",
+    f->path, f->ptr, f->mtime, f->csize, f->usize, f->nxt);
 }
 
 int main(int argc, char *argv[]) {
@@ -271,10 +282,17 @@ int main(int argc, char *argv[]) {
         break;
 
       rda_print_block(blk);
-      rda_file_t *f = rda_parse_file(&rda, blk);
-      rda_print_file(f);
-      if (rda_extract_file(&rda, f, ".") == -1)
-        break;
+      rda_file_t *f = NULL;
+      uint64_t fptr = blk->ptr;
+      for (int i = 0; i < blk->files; ++i) {
+        f = rda_parse_file(&rda, blk, fptr);
+        rda_print_file(f);
+        if (rda_extract_file(&rda, f, ".") == -1)
+          break;
+        
+        fptr = f->nxt;
+        free(f);
+      }
 
       ptr = blk->nxt;
       free(blk);

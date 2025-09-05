@@ -12,25 +12,46 @@ on linux-based systems.
 
 ## usage
 
-    $ ./rda -xf ui.rda 
-    [**] block 0x05545c1a (c=0;e=0;r=0;d=0 19040/19040)
-    [--] > data/fonts/31df-udmarugothic-w4.ttc
-    [**] block 0x8ab1693a (c=0;e=0;r=0;d=0 5738320/5738320)
-    [--] > data/ui/2kimages/4k/base/design_system/backgrounds/bg_badge_squarebase_20x8_0.dds
-    [**] block 0xb6045b12 (c=0;e=0;r=0;d=0 1268960/1268960)
-    [--] > data/ui/4k/base/_test/_test_0.dds
-    [**] block 0xb8bfe11e (c=0;e=0;r=0;d=0 136080/136080)
-    [--] > data/ui/4kimages/fp/assets/common/bg_bluefabric_tile_64_0.dds
-    [**] block 0xb8d3d3a7 (c=0;e=0;r=0;d=0 6720/6720)
-    [--] > data/ui/credits/bmwe_fz_2017_office_farbe_en.png
-    [**] block 0xb8d94992 (c=0;e=0;r=0;d=0 45920/45920)
-    [--] > data/ui/pwl/components/alignmentutility_b973e271-9d9d-454b-82a2-f28ba5347b29.json
-    [**] block 0xc0fc5246 (c=0;e=0;r=0;d=0 2198560/2198560)
-    [--] > data/ui/studio/generated/0000641a-9eed-4cce-830f-7046dae1548f
-    [**] block 0xc1945df6 (c=0;e=0;r=0;d=0 2240/2240)
-    [--] > data/ui/studio/atlases/console_shared_asset_01_0.dds
-    [**] block 0xc1bfd1d9 (c=0;e=0;r=0;d=0 1680/1680)
-    [--] > data/ui/runtimepng/bgr_minimap_undiscovered.png
+    $ ./rda -xf ui.rda
+    [**] block 0x05545c1a (c=0;e=0;r=0;d=0 [n=34] 19040/19040) => 0x8ab1693a
+    [--] > data/fonts/31df-udmarugothic-w4.ttc@0x00000318 (m=1692287079 4090762/4090762) => 0x055413ea
+    [--] > data/fonts/32df-udmarugothic-w6.ttc@0x003e6ea2 (m=1692287079 4072378/4072378) => 0x0554161a
+    [--] > data/fonts/adonis-regular.otf@0x007c925c (m=1718268012 109076/109076) => 0x0554184a
+    [--] > data/fonts/albertusnova-regular.otf@0x007e3c70 (m=1724265053 197464/197464) => 0x05541a7a
+    [--] > data/fonts/albertusnova_eval250512-regular.otf@0x00813fc8 (m=1747138539 174520/174520) => 0x05541caa
+    [--] > data/fonts/albertusnovaforanno117tab.otf@0x0083e980 (m=1747829164 178532/178532) => 0x05541eda
+    [--] > data/fonts/df-kyoukasho-w4.ttc@0x0086a2e4 (m=1692287079 6090242/6090242) => 0x0554210a
+    [--] > data/fonts/df-soukaisho-w7.ttc@0x00e390e6 (m=1692287080 7667606/7667606) => 0x0554233a
+    [--] > data/fonts/df-udgothic-w6.ttc@0x0158907c (m=1692287080 2540818/2540818) => 0x0554256a
+    [--] > data/fonts/dfhei5a.ttf@0x017f558e (m=1692287080 8062792/8062792) => 0x0554279a
+    [--] > data/fonts/dfpkinggothicjp1-regular.ttf@0x01fa5cd6 (m=1717608697 1965620/1965620) => 0x055429ca
+    [--] > data/fonts/dfpt_b5.ttf@0x02185b0a (m=1692287080 8144116/8144116) => 0x05542bfa
+    [--] > data/fonts/dfpyuan5a.ttf@0x02949ffe (m=1717608698 13453800/13453800) => 0x05542e2a
+    [--] > data/fonts/dfpyuan7a.ttf@0x0361e9e6 (m=1717608698 13384404/13384404) => 0x0554305a
+    [--] > data/fonts/heuristica-bold.ttf@0x042e24ba (m=1692287080 226244/226244) => 0x0554328a
+    [--] > data/fonts/heuristica-bolditalic.ttf@0x0431987e (m=1692287080 223964/223964) => 0x055434ba
+    [--] > data/fonts/heuristica-italic.ttf@0x0435035a (m=1692287080 228616/228616) => 0x055436ea
+    [--] > data/fonts/heuristica-regular.ttf@0x04388062 (m=1692287080 282284/282284) => 0x0554391a
+    [--] > data/fonts/kelvinch-bold.ttf@0x043ccf0e (m=1692287080 662452/662452) => 0x05543b4a
+    [--] > data/fonts/kelvinch-bolditalic.ttf@0x0446eac2 (m=1692287080 723256/723256) => 0x05543d7a
+    [--] > data/fonts/kelvinch-italic.ttf@0x0451f3fa (m=1692287080 777924/777924) => 0x05543faa
+    [--] > data/fonts/kelvinch.ttf@0x045dd2be (m=1692287080 658520/658520) => 0x055441da
+    [--] > data/fonts/lisboasans.otf@0x0467df16 (m=1718268012 151476/151476) => 0x0554440a
+    [--] > data/fonts/lisboasansmedium.otf@0x046a2eca (m=1718268012 151172/151172) => 0x0554463a
+    [--] > data/fonts/md_cgothic_l.ttf@0x046c7d4e (m=1692287080 316568/316568) => 0x0554486a
+    [--] > data/fonts/metaoffcpro-norm.ttf@0x047151e6 (m=1692287080 190404/190404) => 0x05544a9a
+    [--] > data/fonts/metaproforubisoft.ttf@0x047439aa (m=1692287080 286196/286196) => 0x05544cca
+    [--] > data/fonts/metaserifoffcpro-medium.ttf@0x0478979e (m=1692287080 203784/203784) => 0x05544efa
+    [--] > data/fonts/metaserifproforubisoft-md.ttf@0x047bb3a6 (m=1692287080 307364/307364) => 0x0554512a
+    [--] > data/fonts/notosanskr-regular.ttf@0x0480644a (m=1718268012 6192764/6192764) => 0x0554535a
+    [--] > data/fonts/notosanstc-regular.ttf@0x04dee2c6 (m=1718268012 7110560/7110560) => 0x0554558a
+    [--] > data/fonts/pelago-regular.otf@0x054b6266 (m=1718268012 283548/283548) => 0x055457ba
+    [--] > data/fonts/roboto-light.ttf@0x054fb602 (m=1692287080 140276/140276) => 0x055459ea
+    [--] > data/fonts/roboto-regular.ttf@0x0551d9f6 (m=1692287080 145348/145348) => 0x05545c1a
+    [**] block 0x8ab1693a (c=0;e=0;r=0;d=0 [n=10247] 5738320/5738320) => 0xb6045b12
+    [--] > data/ui/2kimages/4k/base/design_system/backgrounds/bg_badge_squarebase_20x8_0.dds@0x05545c3a (m=1738611313 3620/3620) => 0x8a59dc1a
+    [--] > data/ui/2kimages/4k/base/design_system/strokes/stroke4_btn_selected_12_0.dds@0x05546a5e (m=1745582519 3268/3268) => 0x8a59de4a
+    [...]
 
 ## format
 
@@ -50,9 +71,15 @@ the file structure is as follow
 |            | block pointer |
 | rda data   | file data     |
 |            | file data     |
+|            | file data     |
+|            | file data     |
+|            | file data     |
 |            | ...           |
 |            | file header   |
+|            | file header   |
+|            | file header   |
 |            | block header  |
+|            | file header   |
 |            | file header   |
 |            | block header  |
 |            | ...           |
@@ -120,8 +147,12 @@ the end of the linked list is indicated by an empty block with pointer value of 
 | reserved          | 2.0     | 536    | 4    |
 |                   | 2.2     | 552    | 8    |
 
-the location of the `file header` is right before the `block header`.
+the location of the first `file header` is right before the `block header`.
 > file header offset = block header offset - size compressed
+
+since one block can contain many files one has to traverse all `file header`
+starting from the first.
+> file header offset = block header offset - size compressed + (file header size * n)
 
 ### path
 
