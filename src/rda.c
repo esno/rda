@@ -4,8 +4,12 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <rda.h>
+
+#define RDA_BUFFER_SIZE 1024
 
 typedef struct options options_t;
 struct options {
@@ -30,7 +34,7 @@ typedef struct {
 
 typedef struct {
   char path[RDA_FILE_HEADER_PATH_LEN];
-  uint64_t *ptr;
+  uint64_t ptr;
   uint64_t csize;
   uint64_t usize;
   uint64_t mtime;
@@ -39,6 +43,61 @@ typedef struct {
 void rda_close(rda_t *rda) {
   fclose(rda->fd);
   rda->fd = NULL;
+}
+
+int rda_extract_file(rda_t *rda, rda_file_t *f, char *workdir) {
+  char *path = strdup(f->path);
+  char *token = NULL;
+  uint32_t w = strlen(workdir);
+  uint32_t p = strlen(path);
+  uint32_t t = w;
+
+  char dest[w + p + 1];
+  memset(&dest, 0, sizeof(dest));
+  strcpy(dest, workdir);
+  do {
+    struct stat sb;
+    if (stat(dest, &sb) == -1) {
+      if (mkdir(dest, 0755) == -1) {
+        fprintf(stderr, "[!!] %s (%s)\n", strerror(errno), dest);
+        return -1;
+      }
+    }
+
+    token = strsep(&path, "/");
+    strcpy(&dest[t], "/");
+    strcpy(&dest[t + 1], token);
+    t = t + strlen(token) + 1;
+  } while (t < p);
+
+  unsigned char *buffer[RDA_BUFFER_SIZE];
+  memset(buffer, 0, sizeof(char) * RDA_BUFFER_SIZE);
+  FILE *fd = fopen(dest, "w");
+  if (fd == NULL) {
+    fprintf(stderr, "[!!] %s (%s)\n", strerror(errno), dest);
+    return -1;
+  }
+
+  size_t rcount, wcount, rsize = 0, bsize = 0;
+  fseek(rda->fd, sizeof(char) * f->ptr, SEEK_SET);
+  do {
+    if (f->csize <= RDA_BUFFER_SIZE)
+      bsize = f->csize;
+    else
+      bsize = (f->csize - rsize <= RDA_BUFFER_SIZE) ? f->csize - rsize : RDA_BUFFER_SIZE;
+
+    rcount = fread(buffer, sizeof(char), bsize, rda->fd);
+    wcount = fwrite(buffer, sizeof(char), rcount, fd);
+    if (wcount != rcount) {
+      fprintf(stderr, "[!!] %s (%s)\n", strerror(errno), dest);
+      fclose(fd);
+      return -1;
+    }
+    rsize += sizeof(char) * rcount;
+  } while (rsize < f->csize);
+
+  fclose(fd);
+  return 0;
 }
 
 int rda_open(rda_t *rda, char *archive) {
@@ -132,7 +191,7 @@ rda_file_t *rda_parse_file(rda_t *rda, rda_block_t *blk) {
   char path[RDA_FILE_HEADER_PATH_LEN];
   memset(&path, 0, sizeof(char) * RDA_FILE_HEADER_PATH_LEN);
 
-  fseek(rda->fd, sizeof(char) * blk->self - blk->csize, SEEK_SET);
+  fseek(rda->fd, sizeof(char) * (blk->self - blk->csize), SEEK_SET);
   fread(&path, sizeof(char), RDA_FILE_HEADER_PATH_LEN, rda->fd);
   for (int i = 0, j = 0; i < RDA_FILE_HEADER_PATH_LEN; ++i) {
     if (path[i] != '\0') {
@@ -214,6 +273,8 @@ int main(int argc, char *argv[]) {
       rda_print_block(blk);
       rda_file_t *f = rda_parse_file(&rda, blk);
       rda_print_file(f);
+      if (rda_extract_file(&rda, f, ".") == -1)
+        break;
 
       ptr = blk->nxt;
       free(blk);
